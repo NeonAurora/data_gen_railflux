@@ -1,3 +1,6 @@
 /.venv/
 firebase_admin_key.json
 __pycache__/
+/build/
+/dist/
+data_generator.spec
