@@ -103,9 +103,26 @@ def main():
         for train_id in TRAIN_IDS
     ]
 
+    start_delays = {
+        'train1': 0,  # no delay
+        'train2': 0,  # no delay
+        'train3': 30  # 5-second delay
+    }
+
+    # Mark the time we started the script
+    program_start_time = time.time()
+
     # Continuously move trains and update Firebase
     while True:
+        current_time = time.time()
         for train in trains:
+            # Check how many seconds have passed since script started
+            elapsed = current_time - program_start_time
+
+            # If not enough time has passed, skip moving this train
+            if elapsed < start_delays.get(train.train_id, 0):
+                continue
+
             train.move()
         time.sleep(0.1)  # Sleep for a short time to control the frequency of updates
 

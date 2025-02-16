@@ -2,7 +2,7 @@
 
 # Train Settings
 SPEED = 2  # Pixels per frame
-TRAIN_IDS = ['train1', 'train2']  # IDs for the trains
+TRAIN_IDS = ['train1', 'train2', 'train3']  # IDs for the trains
 
 # Waypoints without segment information
 WAYPOINTS = {
@@ -11,6 +11,9 @@ WAYPOINTS = {
     ],
     'train2': [
         (250, 70), (200, 70), (182, 70), (163, 70), (119, 70), (90, 70), (70, 70), (53, 70)
+    ],
+    'train3': [
+        (0,60), (10, 60), (30, 60), (50, 60), (100, 60), (110, 60), (130, 40), (150, 40), (170, 40), (190, 60), (200, 60), (250, 60)
     ]
 }
 
@@ -21,6 +24,9 @@ SEGMENTS = {
     ],
     'train2': [
         "T2.S8", "T2.S8", "T2.S7", "T2.S6", "T2.S5", "T2.S4", "T2.S3", "T2.S2", "T2.S1"
+    ],
+    'train3': [
+        "T1.S1", "T1.S2", "T1.S3", "T1.S4", "T1.S5", "T5.S1", "T4.S2", "T4.S4", "T6.S1", "T1.S8", "T1.S9"
     ]
 }
 
