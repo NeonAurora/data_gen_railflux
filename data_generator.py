@@ -50,10 +50,16 @@ class Train:
             self.position = [target_x, target_y]
             self.update_firebase(self.current_waypoint_index)  # Update current segment in Firebase
             self.current_waypoint_index += 1
-            # print("Current waypoint index: ", self.current_waypoint_index)
+
+            # Check if we've reached the end of the track
             if self.current_waypoint_index >= len(self.waypoints):
+                print(f"Train {self.train_id} reached end of track, resetting to start")
                 # Reset to the first waypoint after reaching the last waypoint
                 self.current_waypoint_index = 0
+                # IMPORTANT: Immediately reset position to the starting waypoint
+                self.position = list(self.waypoints[0])
+                # Update Firebase with the reset position and first segment
+                self.update_firebase(0)
             return
 
         # Normalize the direction vector and update the position of the train
@@ -75,8 +81,16 @@ class Train:
             self.last_update_time = current_time
 
     def update_firebase(self, waypoint_index):
+        # Calculate the correct segment index based on train movement direction
+        segment_index = self.get_correct_segment_index(waypoint_index)
+
+        # Ensure segment_index is within bounds
+        if segment_index < 0 or segment_index >= len(self.segments):
+            print(f"Warning: segment_index {segment_index} out of bounds for train {self.train_id}")
+            return
+
         # Write current position, segment, and track to Firebase
-        current_segment = self.segments[waypoint_index-1]  # Get current segment ID from segments list
+        current_segment = self.segments[segment_index]
         track_id, segment_id = current_segment.split('.')
 
         self.train_ref.update({
@@ -84,10 +98,33 @@ class Train:
                 'x': self.position[0],
                 'y': self.position[1]
             },
-            'current_segment': segment_id,  # Update current segment
-            'current_track': track_id,  # Update current track
+            'current_segment': segment_id,
+            'current_track': track_id,
             'timestamp': time.time()
         })
+
+    def get_correct_segment_index(self, waypoint_index):
+        """
+        Calculate the correct segment index based on movement direction.
+        """
+        # Determine movement direction by comparing first and last waypoints
+        if len(self.waypoints) >= 2:
+            start_x = self.waypoints[0][0]
+            end_x = self.waypoints[-1][0]
+            is_moving_right = end_x > start_x
+        else:
+            is_moving_right = True  # Default assumption
+
+        if is_moving_right:
+            # For left-to-right movement (like train1)
+            # When train reaches waypoint N, it should occupy segment N-1
+            # because it's currently in the segment it just traversed
+            return max(0, waypoint_index - 1)
+        else:
+            # For right-to-left movement (like train2)
+            # When train reaches waypoint N, it should occupy segment N
+            # because segments are arranged to match the waypoint progression
+            return waypoint_index
 
 
 def main():
